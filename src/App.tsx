@@ -4,7 +4,7 @@ import Select from "./Select";
 import "./App.css";
 
 type Transition = {
-  id: number;
+  id: string;
   stepId: number;
   intent: string;
 };
@@ -29,10 +29,10 @@ const stepsOptions: Option[] = [
 ];
 
 const defaultTransitions = [
-  { id: 1, stepId: 1, intent: "intent_error" },
-  { id: 2, stepId: 2, intent: "question_answered" },
-  { id: 3, stepId: 3, intent: "intent_timeout" },
-  { id: 4, stepId: 4, intent: "intent_exit" },
+  { id: uuidv4(), stepId: 1, intent: "intent_error" },
+  { id: uuidv4(), stepId: 2, intent: "question_answered" },
+  { id: uuidv4(), stepId: 3, intent: "intent_timeout" },
+  { id: uuidv4(), stepId: 4, intent: "intent_exit" },
 ];
 
 function App() {
