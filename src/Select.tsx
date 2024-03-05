@@ -3,14 +3,15 @@ import type { Option } from "./App";
 
 interface SelectProps {
   options: Option[];
-  transitionId: number;
+  transitionId: string;
+  selectedOptions?: string[];
   placeholder?: string;
   value?: string;
-  onChange: (event: React.ChangeEvent<HTMLSelectElement>, transitionId: number) => void;
+  onChange: (event: React.ChangeEvent<HTMLSelectElement>, transitionId: string) => void;
 }
 
 const Select = (props: SelectProps) => {
-  const { onChange, options, transitionId, placeholder = "Select an option", value = "" } = props;
+  const { selectedOptions = [], onChange, options, transitionId, placeholder = "Select an option", value = "" } = props;
   const [selectedValue, setSelectedValue] = React.useState(value);
 
   const handleOnChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -19,13 +20,11 @@ const Select = (props: SelectProps) => {
   };
 
   return (
-    <select onChange={handleOnChange} value={selectedValue}>
+    <select style={{ width: '250px' }} onChange={handleOnChange} value={selectedValue}>
       <option value="">{placeholder}</option>
-      {options.map(({ value, label }) => (
-        <option key={value} value={value}>
-          {label}
-        </option>
-      ))}
+      {options.filter(option => !selectedOptions.includes(option.value) || option.value === selectedValue).map(option => (
+            <option key={option.value} value={option.value}>{option.label}</option>
+          ))}
     </select>
   );
 };

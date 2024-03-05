@@ -14,7 +14,7 @@ export type Option = {
   label: string;
 };
 
-const options: Option[] = [
+const defaultOptions: Option[] = [
   { value: "intent_error", label: "Intent error" },
   { value: "question_answered", label: "Question answered" },
   { value: "intent_timeout", label: "Intent timeout" },
@@ -36,6 +36,8 @@ const defaultTransitions = [
 ];
 
 function App() {
+  const [options] = React.useState(defaultOptions);
+  const [selectedOptions, setSelectedOptions] = React.useState<string[]>(defaultTransitions.map(item => item.intent) || []);
   const [transitions, setTransitions] = React.useState<Transition[]>(defaultTransitions);
 
   const handleAddTransition = () => {
@@ -43,21 +45,22 @@ function App() {
     setTransitions([...transitions, { id, stepId: -1, intent: "" }]);
   };
 
-  const handleTransitionChange = (event: React.ChangeEvent<HTMLSelectElement>, transitionId: number) => {
+  const handleTransitionChange = (event: React.ChangeEvent<HTMLSelectElement>, transitionId: string) => {
     const { value } = event.target;
-    const newTransitions = transitions.map((transition, idx) => {
-      if (idx === transitionId) {
+    const previousOption = transitions.find((t) => t.id === transitionId)?.intent;
+    setSelectedOptions(selectedOptions.filter(item => item !== previousOption).concat(value));
+    setTransitions(transitions.map((transition) => {
+      if (transition.id === transitionId) {
         return { ...transition, intent: value };
       }
       return transition;
-    });
-    setTransitions(newTransitions);
+    }));
   };
 
-  const handleStepChange = (event: React.ChangeEvent<HTMLSelectElement>, transitionId: number) => {
+  const handleStepChange = (event: React.ChangeEvent<HTMLSelectElement>, transitionId: string) => {
     const { value } = event.target;
-    const newTransitions = transitions.map((transition, idx) => {
-      if (idx === transitionId) {
+    const newTransitions = transitions.map((transition) => {
+      if (transition.id === transitionId) {
         return { ...transition, stepId: parseInt(value) };
       }
       return transition;
@@ -65,10 +68,13 @@ function App() {
     setTransitions(newTransitions);
   };
 
-  const handleDeleteTransition = (transitionId: number) => {
-    const newTransitions = transitions.filter((_, idx) => idx !== transitionId);
-    setTransitions(newTransitions);
+  const handleDeleteTransition = (transitionId: string) => {
+    const deletedOption = transitions.find((t) => t.id === transitionId)?.intent;
+    setSelectedOptions(selectedOptions.filter(item => item !== deletedOption));
+    setTransitions(transitions.filter((t) => t.id !== transitionId));
   };
+
+  console.log(selectedOptions)
 
   return (
     <section>
@@ -76,25 +82,26 @@ function App() {
         <code>{JSON.stringify(transitions)}</code>
       </pre>
       <h1>Multi select</h1>
-      <button onClick={handleAddTransition}>Add transition</button>
+      <button disabled={options.length === selectedOptions.length} onClick={handleAddTransition}>Add transition</button>
       <ul>
-        {transitions.map((transition, idx) => (
+        {transitions.map((transition) => (
           <li key={transition.id}>
             <Select
               placeholder="Select an intent"
-              transitionId={idx}
+              transitionId={transition.id}
               options={options}
               value={transition.intent}
+              selectedOptions={selectedOptions}
               onChange={handleTransitionChange}
             />
             <Select
               placeholder="Select a step id"
-              transitionId={idx}
+              transitionId={transition.id}
               options={stepsOptions}
               value={transition.stepId.toString()}
               onChange={handleStepChange}
             />
-            <button onClick={() => handleDeleteTransition(idx)}>Delete {idx}</button>
+            <button onClick={() => handleDeleteTransition(transition.id)}>Delete</button>
           </li>
         ))}
       </ul>
